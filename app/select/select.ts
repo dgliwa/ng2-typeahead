@@ -79,32 +79,13 @@ let styles = `
 `;
 
 let optionsTemplate = `
-    <ul *ngIf="optionsOpened && options && options.length > 0 && !firstItemHasChildren"
+    <ul *ngIf="optionsOpened && options && options.length > 0"
         class="ui-select-choices dropdown-menu" role="menu">
       <li *ngFor="let o of options" role="menuitem">
         <div class="ui-select-choices-row"
              [class.active]="isActive(o)"
              (mouseenter)="selectActive(o)"
              (click)="selectMatch(o, $event)">
-          <a href="javascript:void(0)" class="dropdown-item">
-            <div [innerHtml]="o.text | highlight:inputValue"></div>
-          </a>
-        </div>
-      </li>
-    </ul>
-
-    <ul *ngIf="optionsOpened && options && options.length > 0 && firstItemHasChildren"
-        class="ui-select-choices dropdown-menu" role="menu">
-      <li *ngFor="let c of options; let index=index" role="menuitem">
-        <div class="divider dropdown-divider" *ngIf="index > 0"></div>
-        <div class="dropdown-header">{{c.text}}</div>
-
-        <div *ngFor="let o of c.children"
-             class="ui-select-choices-row"
-             [class.active]="isActive(o)"
-             (mouseenter)="selectActive(o)"
-             (click)="selectMatch(o, $event)"
-             [ngClass]="{'active': isActive(o)}">
           <a href="javascript:void(0)" class="dropdown-item">
             <div [innerHtml]="o.text | highlight:inputValue"></div>
           </a>
@@ -334,18 +315,17 @@ export class SelectComponent implements OnInit {
     let target = e.target || e.srcElement;
     if (target && target.value) {
       this.inputValue = target.value;
-//      this.behavior.filter(new RegExp(escapeRegexp(this.inputValue), 'ig'));
-      this.http.get(`https://local.rit.aws.regeneron.com:3002/plasmids/typeahead?field=prgn_name&value=${this.inputValue}`)
-        .map(response => response.json()).subscribe(response => {
-
-        })
+      this.behavior.filter(new RegExp(escapeRegexp(this.inputValue), 'ig'));
+      //this.http.get(`https://local.rit.aws.regeneron.com:3002/plasmids/typeahead?field=prgn_name&value=${this.inputValue}`, )
+        //.map(response => response.json()).subscribe(response => {
+//
+  //      })
       this.doEvent('typed', this.inputValue);
     }
   }
 
   public ngOnInit():any {
-    this.behavior = (this.firstItemHasChildren) ?
-      new ChildrenBehavior(this) : new GenericBehavior(this);
+    this.behavior = new GenericBehavior(this);
   }
 
   public remove(item:SelectItem):void {
@@ -372,10 +352,6 @@ export class SelectComponent implements OnInit {
   public clickedOutside():void  {
     this.inputMode = false;
     this.optionsOpened = false;
-  }
-
-  public get firstItemHasChildren():boolean {
-    return this.itemObjects[0] && this.itemObjects[0].hasChildren();
   }
 
   protected matchClick(e:any):void {
@@ -575,85 +551,6 @@ export class GenericBehavior extends Behavior implements OptionsBehavior {
     if (this.actor.options.length > 0) {
       this.actor.activeOption = this.actor.options[0];
       super.ensureHighlightVisible();
-    }
-  }
-}
-
-export class ChildrenBehavior extends Behavior implements OptionsBehavior {
-  public constructor(actor:SelectComponent) {
-    super(actor);
-  }
-
-  public first():void {
-    this.actor.activeOption = this.actor.options[0].children[0];
-    this.fillOptionsMap();
-    this.ensureHighlightVisible(this.optionsMap);
-  }
-
-  public last():void {
-    this.actor.activeOption =
-      this.actor
-        .options[this.actor.options.length - 1]
-        .children[this.actor.options[this.actor.options.length - 1].children.length - 1];
-    this.fillOptionsMap();
-    this.ensureHighlightVisible(this.optionsMap);
-  }
-
-  public prev():void {
-    let indexParent = this.actor.options
-      .findIndex((option:SelectItem) => this.actor.activeOption.parent && this.actor.activeOption.parent.id === option.id);
-    let index = this.actor.options[indexParent].children
-      .findIndex((option:SelectItem) => this.actor.activeOption && this.actor.activeOption.id === option.id);
-    this.actor.activeOption = this.actor.options[indexParent].children[index - 1];
-    if (!this.actor.activeOption) {
-      if (this.actor.options[indexParent - 1]) {
-        this.actor.activeOption = this.actor
-          .options[indexParent - 1]
-          .children[this.actor.options[indexParent - 1].children.length - 1];
-      }
-    }
-    if (!this.actor.activeOption) {
-      this.last();
-    }
-    this.fillOptionsMap();
-    this.ensureHighlightVisible(this.optionsMap);
-  }
-
-  public next():void {
-    let indexParent = this.actor.options
-      .findIndex((option:SelectItem) => this.actor.activeOption.parent && this.actor.activeOption.parent.id === option.id);
-    let index = this.actor.options[indexParent].children
-      .findIndex((option:SelectItem) => this.actor.activeOption && this.actor.activeOption.id === option.id);
-    this.actor.activeOption = this.actor.options[indexParent].children[index + 1];
-    if (!this.actor.activeOption) {
-      if (this.actor.options[indexParent + 1]) {
-        this.actor.activeOption = this.actor.options[indexParent + 1].children[0];
-      }
-    }
-    if (!this.actor.activeOption) {
-      this.first();
-    }
-    this.fillOptionsMap();
-    this.ensureHighlightVisible(this.optionsMap);
-  }
-
-  public filter(query:RegExp):void {
-    let options:Array<SelectItem> = [];
-    let optionsMap:Map<string, number> = new Map<string, number>();
-    let startPos = 0;
-    for (let si of this.actor.itemObjects) {
-      let children:Array<SelectItem> = si.children.filter((option:SelectItem) => query.test(option.text));
-      startPos = si.fillChildrenHash(optionsMap, startPos);
-      if (children.length > 0) {
-        let newSi = si.getSimilar();
-        newSi.children = children;
-        options.push(newSi);
-      }
-    }
-    this.actor.options = options;
-    if (this.actor.options.length > 0) {
-      this.actor.activeOption = this.actor.options[0].children[0];
-      super.ensureHighlightVisible(optionsMap);
     }
   }
 }
