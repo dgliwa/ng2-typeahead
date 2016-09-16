@@ -190,6 +190,7 @@ export class SelectComponent implements OnInit {
   @Input() public idField:string = 'id';
   @Input() public textField:string = 'text';
   @Input() public multiple:boolean = false;
+  @Input() public data: any;
 
   @Input()
   public set items(value:Array<any>) {
@@ -348,12 +349,10 @@ export class SelectComponent implements OnInit {
     if (this.multiple === true && this.active) {
       let index = this.active.indexOf(item);
       this.active.splice(index, 1);
-      this.data.next(this.active);
       this.doEvent('removed', item);
     }
     if (this.multiple === false) {
       this.active = [];
-      this.data.next(this.active);
       this.doEvent('removed', item);
     }
   }
@@ -463,11 +462,9 @@ export class SelectComponent implements OnInit {
     }
     if (this.multiple === true) {
       this.active.push(value);
-      this.data.next(this.active);
     }
     if (this.multiple === false) {
       this.active[0] = value;
-      this.data.next(this.active[0]);
     }
     this.doEvent('selected', value);
     this.hideOptions();
