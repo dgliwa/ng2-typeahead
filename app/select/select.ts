@@ -3,6 +3,8 @@ import { SelectItem } from './select-item';
 import { stripTags } from './select-pipes';
 import { OptionsBehavior } from './select-interfaces';
 import { escapeRegexp } from './common';
+import {Http} from "@angular/http";
+import 'rxjs/add/operator/map';
 
 let styles = `
 .ui-select-toggle {
@@ -256,7 +258,7 @@ export class SelectComponent implements OnInit {
   private _disabled:boolean = false;
   private _active:Array<SelectItem> = [];
 
-  public constructor(element:ElementRef) {
+  public constructor(element:ElementRef, private http:Http) {
     this.element = element;
     this.clickedOutside = this.clickedOutside.bind(this);
   }
@@ -332,7 +334,11 @@ export class SelectComponent implements OnInit {
     let target = e.target || e.srcElement;
     if (target && target.value) {
       this.inputValue = target.value;
-      this.behavior.filter(new RegExp(escapeRegexp(this.inputValue), 'ig'));
+//      this.behavior.filter(new RegExp(escapeRegexp(this.inputValue), 'ig'));
+      this.http.get(`https://local.rit.aws.regeneron.com:3002/plasmids/typeahead?field=prgn_name&value=${this.inputValue}`)
+        .map(response => response.json()).subscribe(response => {
+
+        })
       this.doEvent('typed', this.inputValue);
     }
   }
