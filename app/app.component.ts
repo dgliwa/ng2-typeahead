@@ -9,7 +9,7 @@ import { Component } from '@angular/core';
               [multiple]="true"
               [items]="items"
               [disabled]="disabled"
-              (data)="refreshValue($event)"
+              (dataChange)="refreshValue($event)"
               (selected)="selected($event)"
               (removed)="removed($event)"
               placeholder="No city selected"></ng-select>

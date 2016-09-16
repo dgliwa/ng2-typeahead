@@ -217,7 +217,7 @@ export class SelectComponent implements OnInit {
     }
   }
 
-  @Output() public data:EventEmitter<any> = new EventEmitter();
+  @Output() public dataChange:EventEmitter<any> = new EventEmitter();
   @Output() public selected:EventEmitter<any> = new EventEmitter();
   @Output() public removed:EventEmitter<any> = new EventEmitter();
   @Output() public typed:EventEmitter<any> = new EventEmitter();
