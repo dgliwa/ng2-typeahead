@@ -5,15 +5,13 @@ import { Component } from '@angular/core';
     template: `
     <div style="width: 300px; margin-bottom: 20px;">
   <h3>Select multiple cities</h3>
-  <ng-select [data]="value"
+  <ng-select [(data)]="value"
               [multiple]="true"
               [items]="items"
               [disabled]="disabled"
-              (dataChange)="refreshValue($event)"
               (selected)="selected($event)"
               (removed)="removed($event)"
               placeholder="No city selected"></ng-select>
-  <pre>{{itemsToString(value)}}</pre>
   <div>
     <button type="button" class="btn btn-primary" btnCheckbox
             btnCheckboxTrue="1" btnCheckboxFalse="0">
@@ -21,6 +19,8 @@ import { Component } from '@angular/core';
     </button>
   </div>
 </div>
+
+    {{value | json}}
 `
 })
 export class AppComponent {

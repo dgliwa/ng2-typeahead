@@ -315,11 +315,11 @@ export class SelectComponent implements OnInit {
     let target = e.target || e.srcElement;
     if (target && target.value) {
       this.inputValue = target.value;
-      this.behavior.filter(new RegExp(escapeRegexp(this.inputValue), 'ig'));
-      //this.http.get(`https://local.rit.aws.regeneron.com:3002/plasmids/typeahead?field=prgn_name&value=${this.inputValue}`, )
-        //.map(response => response.json()).subscribe(response => {
-//
-  //      })
+      //this.behavior.filter(new RegExp(escapeRegexp(this.inputValue), 'ig'));
+      this.http.get(`http://jsonplaceholder.typicode.com/posts/?title=${this.inputValue}`)
+        .map(response => response.json()).subscribe(response => {
+        console.log("response");
+      })
       this.doEvent('typed', this.inputValue);
     }
   }
@@ -448,6 +448,7 @@ export class SelectComponent implements OnInit {
     if (this.multiple === false) {
       this.active[0] = value;
     }
+    this.doEvent('dataChange', this.active);
     this.doEvent('selected', value);
     this.hideOptions();
     if (this.multiple === true) {
